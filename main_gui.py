@@ -6,62 +6,61 @@ class OCT_GUI:
     def __init__(self, master):
         master.title("OCT Image Reconstruction")
 
-        gen_frame = LabelFrame(master, text="General")
-        gen_frame.pack( side = TOP )
+        gen_frame = LabelFrame(master)
+        gen_frame.grid( row=0,column=0 )
 
-        update_im = Button(gen_frame, text="Update Image", command=self.update_im )
-        update_im.pack() 
+        file_frame = LabelFrame(gen_frame, text="File")
+        file_frame.grid()
+
+
+
+        update_im = Button(file_frame, text="Update Image", command=self.update_im )
+        update_im.grid(row=0, column=0, sticky=W+E) 
         
-        choose_im = Button( gen_frame, text="Choose Image", command=self.choose_im )
-        choose_im.pack() 
+        choose_im = Button( file_frame, text="Choose Image", command=self.choose_im )
+        choose_im.grid(row=1, column=0, sticky=W+E)  
         
-        save_ims = Button( gen_frame, text="Save Images", command=self.update_im )
-        save_ims.pack() 
+        save_ims = Button( file_frame, text="Save Images", command=self.update_im )
+        save_ims.grid(row=2, column=0, sticky=W+E) 
 
         self.saveall_ims = IntVar()
-        saveall_ims = Checkbutton(gen_frame, \
+        saveall_ims = Checkbutton(file_frame, \
                                   text="Process All Files in Current Folder?",\
                                   onvalue = 1, offvalue = 0, \
                                   variable = self.saveall_ims)
-        saveall_ims.pack()
+        saveall_ims.grid(row=3, column=0, sticky=W+E) 
 
-        ## --- Image Display Frame
-        image_disp = LabelFrame(master, text="Image Display")
-        image_disp.pack( side = BOTTOM )
+
+
+
+        image_settings = LabelFrame(gen_frame, text="Preview Settings")
+        image_settings.grid(sticky = W+E)
+        
         
         self.variable = StringVar()
         self.variable.set("Intensity") # default value
         
-        disp_im = OptionMenu(image_disp, self.variable, "Intensity", "Phase", "Doppler")
-        disp_im.pack()
-
-        self.im_data = Image.open('/home/benjamin/Pictures/Wallpapers/index.png')
-        self.im_ref = ImageTk.PhotoImage(self.im_data)
-        
-        self.im_current = Label(image_disp,image=self.im_ref)
-        self.im_current.pack()
-        
-        
-        
-#        filein_frame = LabelFrame(master,text="File Input")
-#        filein_frame.pack( side = RIGHT )
-#        
-#        self.file_path = Entry(filein_frame)
-#        self.file_path.pack()
+        disp_im = OptionMenu(image_settings, self.variable, "Intensity", "Phase", "Doppler")
+        disp_im.grid()
 
 
-        '''
-        Buttons to add:
-            Image (phase,intensity,doppler,mask,etc)
-            Preview file
-            Run files
-            Set dispersion compensation
-            
-        '''
+
+
+        ## --- Image Display Frame
+        image_frame = LabelFrame(master)
+        image_frame.grid(  row=0, column=1)
+
+
+#        self.my_image1 = PhotoImage(file = "index1.png")
+
+        
+        self.image_canvas = Canvas(image_frame)
+        self.image_canvas.grid(row=0, column=0, sticky = E+W+N+S)        
+
         
         ## --- Dispersion Compensation
-        dispcomp_frame = LabelFrame(master,text="Dispersion Control")
-        dispcomp_frame.pack( side = RIGHT )
+        dispcomp_frame = LabelFrame(gen_frame,text="Dispersion Control")
+        dispcomp_frame.grid(sticky=W+E)
         
         self.dispcomp_a0 = DoubleVar()
         self.dispcomp_a1 = DoubleVar()
@@ -77,14 +76,14 @@ class OCT_GUI:
         dispcomp_a3 = Scale(dispcomp_frame, from_=-100, to=100, \
                             variable = self.dispcomp_a3)
         
-        dispcomp_a0.grid()
-        dispcomp_a1.grid()
-        dispcomp_a2.grid()
-        dispcomp_a3.grid()
+        dispcomp_a0.grid(row=0, column=0)
+        dispcomp_a1.grid(row=0, column=1)
+        dispcomp_a2.grid(row=0, column=2)
+        dispcomp_a3.grid(row=0, column=3)
         
         ## --- Save Image Types
-        saveset_frame = LabelFrame(master,text="Save Images")
-        saveset_frame.pack( side = TOP )
+        saveset_frame = LabelFrame(gen_frame,text="Save Images")
+        saveset_frame.grid( sticky=W+E )
         
         self.saveim_intensity = IntVar()
         self.saveim_phase = IntVar()
@@ -100,22 +99,27 @@ class OCT_GUI:
                                             onvalue = 1, offvalue = 0, \
                                             variable = self.saveim_mask)
         
-        saveim_intensity.pack( side = TOP )
-        saveim_phase.pack( side = TOP )
-        saveim_mask.pack( side = TOP )
+        saveim_intensity.grid( row=0, column=0, sticky=W )
+        saveim_phase.grid( row=1, column=0, sticky=W )
+        saveim_mask.grid( row=2, column=0, sticky=W )
         
-        ## --- 
+## _______________________________________________________________________ 
         
     def update_im(self):
-        return
+        self.new_image = PhotoImage(file = "index2.png")
+        self.canvas.itemconfig(self.image_on_canvas, image = self.new_image)
         
     def choose_im(self):
-        filename =  filedialog.askopenfilename( initialdir = "/home/benjamin/", \
-                                               title = "Select file", \
-                                               filetypes = (("jpeg files","*.jpg"), \
-                                                            ("all files","*.*")) )
-#        print (root.filename)
+        self.filename =  filedialog.askopenfilename( initialdir = "/home/benjamin/Documents/Misc - Projects/OCT-Image-Reconstruction/", \
+                                               title = "Select file" )
+        
+        self.raw_image = PhotoImage(file = self.filename)
+        self.image_disp = self.image_canvas.create_image(0, 0, anchor = NW, image = self.raw_image)
 
+
+## _______________________________________________________________________ 
+# Run GUI
+        
 root = Tk()
 oct_gui = OCT_GUI(root)
 root.mainloop()
