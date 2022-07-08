@@ -1,4 +1,4 @@
-from scipy.interpolate import spline, interp1d
+from scipy.interpolate import BSpline, interp1d
 from scipy.signal import hilbert
 from numpy.fft import fft, ifft
 from math import pi
